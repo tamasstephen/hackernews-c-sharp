@@ -4,15 +4,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<INewsService, NewsService>();
+builder.Services.AddCors(options =>
+{
+   options.AddDefaultPolicy(policy =>
+   {
+      policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
+   });
+});
 
 var app = builder.Build();
-
+app.UseCors();
 
 app.MapGet("/", async (INewsService newsService) =>
 {
-   var ids = await newsService.GetStories(10);
-   var storyTitles = string.Join(',', ids.Select(id => id.Title).ToList());
-   return storyTitles;
+   var stories = await newsService.GetStories(10);
+   return stories;
 });
 
-app.Run();
+app.Run("http://localhost:5000");

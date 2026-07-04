@@ -19,7 +19,7 @@ class NewsService:INewsService
     {
         if(_storyIds.Count == 0)
         {
-            await GetStoriyIdsAsync();
+            await GetStoryIdsAsync();
         }
 
         if(_stories.Count == 0 || count > _stories.Count)
@@ -30,7 +30,7 @@ class NewsService:INewsService
         return _stories;
     }
 
-    private async Task GetStoriyIdsAsync()
+    private async Task GetStoryIdsAsync()
     {
         var httpRequestMessage = GetHttpReqestMessage(
             "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty"
@@ -72,8 +72,7 @@ class NewsService:INewsService
         }
     }
 
-    var stories = (await Task.WhenAll(tasks)).Where(story => story is not null).Cast<GetStoriesResponse>().ToList();
-    _stories = stories;
+    _stories = (await Task.WhenAll(tasks)).Where(story => story is not null).Cast<GetStoriesResponse>().ToList();
    }
 
    private HttpRequestMessage GetHttpReqestMessage(string url)
