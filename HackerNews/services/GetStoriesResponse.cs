@@ -1,5 +1,9 @@
-interface GetStoriesResponse{
-    int Id { get; set; }
-    string Title { get; set; }
-    string Url { get; set; }
-}
+public record GetStoriesResponse(
+    int Id,
+    string? Title,
+    string? Url,
+    string? By,
+    int Score,
+    long Time,
+    string? Type
+);

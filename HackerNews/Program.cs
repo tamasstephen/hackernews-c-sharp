@@ -11,8 +11,8 @@ var app = builder.Build();
 app.MapGet("/", async (INewsService newsService) =>
 {
    var ids = await newsService.GetStories(10);
-   Console.WriteLine($"The ids are the following:");
-   return $"Hello World!";
+   var storyTitles = string.Join(',', ids.Select(id => id.Title).ToList());
+   return storyTitles;
 });
 
 app.Run();
