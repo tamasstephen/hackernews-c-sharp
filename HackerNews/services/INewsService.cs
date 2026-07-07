@@ -2,6 +2,6 @@ namespace HackerNews.Services;
 
 interface INewsService
 {
-    Task<List<GetStoriesResponse>> GetStories(int? count);
+    Task<StoriesResponse> GetStories(int? count);
 }
 

@@ -1,4 +1,4 @@
-public record GetStoriesResponse(
+public record Stories(
     int Id,
     string? Title,
     string? Url,
@@ -6,4 +6,10 @@ public record GetStoriesResponse(
     int Score,
     long Time,
     string? Type
+);
+
+public record StoriesResponse (
+    List<Stories> Data,
+    int Total,
+    int Count
 );

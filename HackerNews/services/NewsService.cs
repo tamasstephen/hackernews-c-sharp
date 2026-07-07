@@ -7,7 +7,7 @@ class NewsService:INewsService
 
     private static readonly int DefaultCount = 10;
     private List<int> _storyIds = [];
-    private List<GetStoriesResponse> _stories = [];
+    private List<Stories> _stories = [];
     private readonly IHttpClientFactory _clientFactory;
 
     public NewsService(IHttpClientFactory clientFactory)
@@ -15,7 +15,7 @@ class NewsService:INewsService
        _clientFactory = clientFactory;
     }
 
-    public async Task<List<GetStoriesResponse>> GetStories(int? count)
+    public async Task<StoriesResponse> GetStories(int? count)
     {
         if(_storyIds.Count == 0)
         {
@@ -27,32 +27,22 @@ class NewsService:INewsService
             await GetStoriesAsync(count);
         }
 
-        return _stories;
+        return new StoriesResponse(_stories, _storyIds.Count, _stories.Count);
     }
 
     private async Task GetStoryIdsAsync()
     {
-        var httpRequestMessage = GetHttpReqestMessage(
-            "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty"
-        );
+        var httpRequestMessage = "https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty";
         var client = _clientFactory.CreateClient();
-        var httpResponseMessage = await client.SendAsync(httpRequestMessage);
-        if (!httpResponseMessage.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException( $"The API returned {(int)httpResponseMessage.StatusCode} ({httpResponseMessage.StatusCode}).",
-        null,
-        httpResponseMessage.StatusCode);
-        }
+        var response = await client.GetFromJsonAsync<List<int>>(httpRequestMessage);
 
-        var contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
-        var ids = await JsonSerializer.DeserializeAsync<List<int>>(contentStream);
-        _storyIds = ids;
+        _storyIds = response ?? [];
    }
 
    private async Task GetStoriesAsync(int? count)
    {
 
-    var tasks = new List<Task<GetStoriesResponse?>>();
+    var tasks = new List<Task<Stories?>>();
     var client = _clientFactory.CreateClient();
     var currentCount = count ?? DefaultCount;
     var start = currentCount == DefaultCount ? 0 : _stories.Count;
@@ -64,7 +54,7 @@ class NewsService:INewsService
         {
             count --;
             var url = $"https://hacker-news.firebaseio.com/v0/item/{taskId}.json?print=pretty";
-            tasks.Add(client.GetFromJsonAsync<GetStoriesResponse>(url));    
+            tasks.Add(client.GetFromJsonAsync<Stories>(url));    
             if (count == 0)
             {
                 break;
@@ -72,15 +62,6 @@ class NewsService:INewsService
         }
     }
 
-    _stories = (await Task.WhenAll(tasks)).Where(story => story is not null).Cast<GetStoriesResponse>().ToList();
+    _stories = (await Task.WhenAll(tasks)).Where(story => story is not null).Cast<Stories>().ToList();
    }
-
-   private HttpRequestMessage GetHttpReqestMessage(string url)
-    {
-        return new HttpRequestMessage(
-            HttpMethod.Get,
-            url
-        );
-    }
-
 }

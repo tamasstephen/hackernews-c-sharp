@@ -15,9 +15,9 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 app.UseCors();
 
-app.MapGet("/", async (INewsService newsService) =>
+app.MapGet("/", async (int? count, INewsService newsService) =>
 {
-   var stories = await newsService.GetStories(10);
+   var stories = await newsService.GetStories(count);
    return stories;
 });
 
